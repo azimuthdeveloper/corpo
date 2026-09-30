@@ -123,3 +123,21 @@ Environment="NO_PROXY=${env.NO_PROXY}"
 # then:
 sudo systemctl daemon-reload && sudo systemctl restart docker`;
 };
+
+// The installer starts the panel with the proxy/CA already in its environment;
+// on first boot, record that in the settings so the UI shows it and saving the
+// page doesn't strip it.
+export const networkSeedFromEnv = (
+	env: Record<string, string | undefined>,
+): ProxySettings => {
+	const builtin = new Set(BUILTIN_NO_PROXY);
+	const userNoProxy = (env.NO_PROXY || env.no_proxy || "")
+		.split(/[\s,]+/)
+		.map((entry) => entry.trim())
+		.filter((entry) => entry && !builtin.has(entry));
+	return {
+		httpProxy: env.HTTP_PROXY || env.http_proxy || null,
+		httpsProxy: env.HTTPS_PROXY || env.https_proxy || null,
+		noProxy: userNoProxy.length > 0 ? userNoProxy.join(",") : null,
+	};
+};

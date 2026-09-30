@@ -32,6 +32,43 @@ Corpo is an internal-network fork of [Dokploy](https://github.com/Dokploy/dokplo
   - **Docker daemon:** image pulls need the proxy on the host daemon. The page shows the systemd drop-in to install; the Corpo installer (Phase 5) writes it for you.
   - **Remote servers** are not covered yet: builds and containers there don't get the proxy or CA automatically.
 
+## Install
+
+On a Linux VM (Ubuntu or RHEL family) inside the network, with ports 80, 443 and 3000 free:
+
+```bash
+curl -fsSLO https://raw.githubusercontent.com/azimuthdeveloper/corpo/main/install.sh
+sudo CORPO_HTTP_PROXY=http://proxy.example.internal:8080 \
+     CORPO_NO_PROXY=.example.internal \
+     CORPO_CA_FILE=/path/to/internal-root-ca.pem \
+     bash install.sh
+```
+
+Every variable is optional; `install.sh` lists all of them at the top. The installer:
+
+- Trusts the internal CA system-wide, installs Docker if it's missing, and gives the Docker daemon the proxy (a systemd drop-in). It restarts Docker only when those settings actually change.
+- Initialises Swarm only if it isn't already active, and never leaves an existing swarm.
+- Creates Postgres, the Corpo panel and Traefik. The panel starts with the proxy and CA variables already set, and seeds Settings → Network from them on first boot.
+- Waits for the panel to write Traefik's config before starting Traefik.
+
+Then open `http://<server>:3000`, create the admin account, and fill in Settings → Gateway (IIS) and Settings → Network.
+
+**Updating:** `sudo bash install.sh update` pulls `CORPO_IMAGE` (default `ghcr.io/azimuthdeveloper/corpo:latest`) and rolls the panel onto it, re-applying the proxy and CA variables.
+
+## Image
+
+`.github/workflows/corpo.yml` runs typecheck, tests (with a real Docker Swarm) and build on every push to `main`, then publishes the image to GHCR:
+
+| Tag | Published when |
+| --- | --- |
+| `latest` | every push to `main` |
+| `sha-<commit>` | every push to `main` |
+| `X.Y.Z` | a `vX.Y.Z` tag is pushed |
+
+- **Actions:** it is disabled on forks until you enable it in the repository's Actions tab.
+- **Package visibility:** GHCR packages start private. Either make the `corpo` package public, or install with `CORPO_REGISTRY_USER` / `CORPO_REGISTRY_TOKEN` (a token with `read:packages`).
+- **Removed workflows:** upstream's Docker Hub publishing, docs sync and release workflows are removed. `pull-request.yml` still checks PRs.
+
 ## Fork rules (keep upstream merges cheap)
 
 - New code goes in `packages/server/src/corpo/` and `apps/dokploy/components/corpo/`. Upstream files only get small hooks.
@@ -42,6 +79,7 @@ Corpo is an internal-network fork of [Dokploy](https://github.com/Dokploy/dokplo
   pnpm --filter=dokploy corpo:migration:generate --name <name>
   ```
 
+- Upstream workflow files deleted here may conflict when upstream edits them; resolve by deleting them again.
 - Merging upstream:
 
   ```bash
@@ -55,4 +93,13 @@ Corpo is an internal-network fork of [Dokploy](https://github.com/Dokploy/dokplo
 2. ~~Gateway settings, IIS routes, exact path routing, `CORPO_*` env~~
 3. ~~Git polling auto-deploy and HTTPS token credentials~~
 4. ~~Corporate proxy and internal CA for the panel, git, builds and containers~~
-5. Corpo image build/publish and a forked install script
+5. ~~Corpo image build/publish and install script~~
+
+### Known gaps
+
+- Remote (multi-server) deployments don't get the proxy, CA, or CA mount automatically.
+- Compose services get `CORPO_*` route env or the CA mount only if they add them themselves.
+- The `/cor-app` → `/cor-app/` redirect with *Strip path* applies to application routes, not compose labels.
+- Polled deployments ignore watch paths. Polling supports GitHub and Git sources only (not GitLab, Gitea or Bitbucket).
+- About 50 longer help texts still say "Dokploy".
+- Java apps need the internal CA imported into their own truststore.

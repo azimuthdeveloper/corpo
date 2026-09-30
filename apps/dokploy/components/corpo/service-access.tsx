@@ -222,7 +222,7 @@ export const ServiceAccess = ({ id, type }: Props) => {
 									/>
 									<Label
 										htmlFor="corpo-route-strip"
-										className="font-normal text-muted-foreground leading-snug"
+										className="block font-normal text-muted-foreground leading-snug"
 									>
 										Strip the path before forwarding. Turn this on for apps that
 										only work at <code>/</code>; leave it off for apps that

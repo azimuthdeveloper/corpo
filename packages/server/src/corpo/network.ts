@@ -1,6 +1,6 @@
 import { execFile } from "node:child_process";
 import { X509Certificate } from "node:crypto";
-import { mkdir, rm, writeFile } from "node:fs/promises";
+import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { rootCertificates } from "node:tls";
 import { promisify } from "node:util";
@@ -12,6 +12,7 @@ import {
 	CA_CUSTOM_FILE,
 	CONTAINER_CA_DIR,
 	caEnv,
+	networkSeedFromEnv,
 	PANEL_MANAGED_ENV_KEYS,
 	panelEnv,
 	proxyEnv,
@@ -174,8 +175,33 @@ export const applyNetworkToPanel = async (settings: NetworkSettings) => {
 	return { restarting: true as const, reason: "changed" as const };
 };
 
+const seedNetworkSettings = async () => {
+	const existing = await db.query.corpoNetwork.findFirst({
+		where: eq(corpoNetwork.id, "default"),
+	});
+	if (existing) return;
+	const seed = networkSeedFromEnv(process.env);
+	let caCertificates: string | null = null;
+	const caPath = process.env.NODE_EXTRA_CA_CERTS;
+	if (caPath) {
+		try {
+			caCertificates =
+				parsePemCertificates(await readFile(caPath, "utf8"))
+					.map((c) => c.pem)
+					.join("") || null;
+		} catch (error) {
+			console.error(`Corpo: could not read CA from ${caPath}`, error);
+		}
+	}
+	await db
+		.insert(corpoNetwork)
+		.values({ id: "default", ...seed, caCertificates })
+		.onConflictDoNothing();
+};
+
 export const syncNetworkOnStartup = async () => {
 	try {
+		await seedNetworkSettings();
 		const settings = await getNetworkSettings();
 		const caDir = await writeCaFiles(settings);
 		const pending = serviceEnvUpdateArgs(

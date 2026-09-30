@@ -1,4 +1,4 @@
-import { readFileSync, writeFileSync } from "node:fs";
+import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { db } from "@dokploy/server/db";
 import { eq } from "drizzle-orm";
@@ -61,6 +61,11 @@ export const updateGatewaySettings = async (input: UpdateGatewayInput) => {
 export const applyTrustedProxyIps = (trustedIps: string[]) => {
 	const { MAIN_TRAEFIK_PATH } = paths();
 	const configPath = join(MAIN_TRAEFIK_PATH, "traefik.yml");
+	// Before the panel's first start (or in development) there is no Traefik
+	// config yet; the startup sync applies the IPs once it exists.
+	if (!existsSync(configPath)) {
+		return false;
+	}
 	const config = parse(readFileSync(configPath, "utf8")) as MainTraefikConfig;
 	const web = config.entryPoints?.web;
 	if (!web) {
@@ -83,4 +88,17 @@ export const applyTrustedProxyIps = (trustedIps: string[]) => {
 	}
 	writeFileSync(configPath, stringify(config), "utf8");
 	return true;
+};
+
+export const syncGatewayOnStartup = async (
+	restartTraefik: () => Promise<unknown>,
+) => {
+	try {
+		const settings = await getGatewaySettings();
+		if (applyTrustedProxyIps(settings.trustedProxyIps)) {
+			await restartTraefik();
+		}
+	} catch (error) {
+		console.error("Corpo: could not sync gateway settings", error);
+	}
 };

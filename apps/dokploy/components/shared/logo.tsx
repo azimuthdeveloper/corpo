@@ -33,11 +33,17 @@ export const Logo = ({ className = "size-14", logoUrl }: Props) => {
 				rx="14"
 				className="fill-primary"
 			/>
-			<path
-				d="M44 21.5A15 15 0 1 0 44 42.5"
+			{/* A circle stroke rather than a path, so layouts that restyle SVG paths
+			    (e.g. the onboarding wizard) can't paint over the letter. */}
+			<circle
+				cx="32"
+				cy="32"
+				r="15"
 				fill="none"
 				strokeWidth="6"
 				strokeLinecap="round"
+				strokeDasharray="70.25 24"
+				strokeDashoffset="-12"
 				className="stroke-primary-foreground"
 			/>
 			<rect

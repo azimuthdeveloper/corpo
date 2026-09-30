@@ -259,7 +259,7 @@ export const AddInvitation = () => {
 									<FormItem>
 										<FormLabel>Email</FormLabel>
 										<FormControl>
-											<Input placeholder={"email@dokploy.com"} {...field} />
+											<Input placeholder={"you@example.internal"} {...field} />
 										</FormControl>
 										<FormDescription>
 											This will be the email of the new user

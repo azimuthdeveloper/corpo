@@ -1,4 +1,4 @@
-import { loadStripe } from "@stripe/stripe-js";
+import { loadStripe } from "@stripe/stripe-js/pure";
 import { ArrowRightIcon, CheckIcon } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -11,9 +11,11 @@ import { Button } from "@/components/ui/button";
 import { api } from "@/utils/api";
 import { displayFont } from "../font";
 
-const stripePromise = loadStripe(
-	process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!,
-);
+// The pure entry point and the key guard keep Stripe.js from loading at all
+// unless billing is configured, which it never is on Corpo.
+const stripePromise = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
+	? loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY)
+	: Promise.resolve(null);
 
 type Tier = "hobby" | "startup";
 

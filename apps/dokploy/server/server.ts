@@ -10,9 +10,11 @@ import {
 	initializeNetwork,
 	initSchedules,
 	initVolumeBackupsCronJobs,
+	reloadDockerResource,
 	sendDokployRestartNotifications,
 	setupDirectories,
 	startCorpoPoller,
+	syncGatewayOnStartup,
 	syncNetworkOnStartup,
 } from "@dokploy/server";
 import { config } from "dotenv";
@@ -64,6 +66,7 @@ void app.prepare().then(async () => {
 			createDefaultMiddlewares();
 			await initializeNetwork();
 			await syncNetworkOnStartup();
+			await syncGatewayOnStartup(() => reloadDockerResource("dokploy-traefik"));
 			await initCronJobs();
 			await initSchedules();
 			await initCancelDeployments();
