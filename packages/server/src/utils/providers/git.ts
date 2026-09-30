@@ -5,6 +5,7 @@ import {
 	updateSSHKeyById,
 } from "@dokploy/server/services/ssh-key";
 import { quote } from "shell-quote";
+import { gitHttpsAuthPrefix } from "../../corpo/git-auth";
 import { execAsync, execAsyncRemote } from "../process/execAsync";
 
 interface CloneGitRepository {
@@ -16,6 +17,8 @@ interface CloneGitRepository {
 	serverId: string | null;
 	type?: "application" | "compose";
 	outputPathOverride?: string;
+	applicationId?: string | null;
+	composeId?: string | null;
 }
 
 export const cloneGitRepository = async ({
@@ -79,7 +82,8 @@ export const cloneGitRepository = async ({
 		command += "chmod 600 /tmp/id_rsa;";
 		command += `export GIT_SSH_COMMAND="${gitSshCommand}";`;
 	}
-	command += `if ! git clone --branch ${quote([String(customGitBranch ?? "")])} --depth 1 ${enableSubmodules ? "--recurse-submodules" : ""} --progress ${quote([String(customGitUrl ?? "")])} ${quote([String(outputPath ?? "")])}; then
+	const authPrefix = await gitHttpsAuthPrefix(customGitUrl, entity);
+	command += `if ! ${authPrefix}git clone --branch ${quote([String(customGitBranch ?? "")])} --depth 1 ${enableSubmodules ? "--recurse-submodules" : ""} --progress ${quote([String(customGitUrl ?? "")])} ${quote([String(outputPath ?? "")])}; then
 				echo ${quote([`❌ [ERROR] Fail to clone the repository ${customGitUrl}`])};
 				exit 1;
 			fi

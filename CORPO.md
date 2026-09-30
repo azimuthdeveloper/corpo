@@ -18,6 +18,12 @@ Corpo is an internal-network fork of [Dokploy](https://github.com/Dokploy/dokplo
 - **Access card** (Domains tab of an application or compose service): shows direct port URLs and IIS routes, and adds an IIS route from a short name.
 - **Exact path routing.** A domain path `/cor-app` matches `/cor-app` and `/cor-app/...` but not `/cor-application`. With *Strip path* on, `/cor-app` redirects to `/cor-app/`.
 - **`CORPO_BASE_PATH` / `CORPO_PUBLIC_URL`** are injected into application build args and runtime env for the primary route (the IIS route if there is one). Values you set yourself take precedence.
+- **Auto-deploy by polling** (General tab of an application or compose service). GitHub.com and Azure DevOps cloud can't send webhooks into the network, so Corpo runs `git ls-remote` on the branch at a set interval (30 seconds minimum) and queues a normal deployment when the head commit changes. Details:
+  - Switching polling on records the current commit as a baseline, so it never deploys straight away.
+  - Failures back off exponentially, up to 30 minutes, and the latest error shows on the card.
+  - Watch paths are not applied to polled deployments.
+  - Supported sources: GitHub (the existing GitHub App token) and Git (SSH key, or HTTPS with a token).
+- **HTTPS git tokens** (same card, for Git sources with an `https://` URL, such as an Azure DevOps PAT with Code: Read). The token is sent as an `http.extraHeader` through git's environment config, scoped to the single clone or `ls-remote` command, so it never appears in the URL, deployment logs or later build steps.
 
 ## Fork rules (keep upstream merges cheap)
 
@@ -40,6 +46,6 @@ Corpo is an internal-network fork of [Dokploy](https://github.com/Dokploy/dokplo
 
 1. ~~Remove enterprise code, rebrand, drop Let's Encrypt and self-update~~
 2. ~~Gateway settings, IIS routes, exact path routing, `CORPO_*` env~~
-3. Git **polling** auto-deploy (GitHub.com / Azure DevOps cloud can't send webhooks into the network), plus HTTPS+PAT credentials for Azure DevOps
+3. ~~Git polling auto-deploy and HTTPS token credentials~~
 4. Corporate proxy (`HTTP(S)_PROXY`, `NO_PROXY`) and internal CA bundle for git, builds and containers
 5. Corpo image build/publish and a forked install script

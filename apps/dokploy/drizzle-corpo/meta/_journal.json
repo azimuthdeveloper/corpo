@@ -8,6 +8,13 @@
       "when": 1790771710311,
       "tag": "0000_corpo_gateway",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1790772632872,
+      "tag": "0001_corpo_service_git",
+      "breakpoints": true
     }
   ]
 }

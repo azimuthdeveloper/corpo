@@ -12,6 +12,7 @@ import {
 	initVolumeBackupsCronJobs,
 	sendDokployRestartNotifications,
 	setupDirectories,
+	startCorpoPoller,
 } from "@dokploy/server";
 import { config } from "dotenv";
 import next from "next";
@@ -73,6 +74,8 @@ void app.prepare().then(async () => {
 			console.log("Starting Deployment Worker");
 			const { startDeploymentWorker } = await import("./queues/queueSetup");
 			await startDeploymentWorker();
+			const { enqueuePolledDeployment } = await import("./corpo/poll-deploy");
+			startCorpoPoller({ enqueue: enqueuePolledDeployment });
 		}
 	} catch (e) {
 		console.error("Main Server Error", e);

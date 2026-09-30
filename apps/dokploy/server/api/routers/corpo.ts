@@ -6,13 +6,24 @@ import {
 	findDomainsByApplicationId,
 	findDomainsByComposeId,
 	getGatewaySettings,
+	getServiceGitRow,
+	getServiceGitSettings,
 	getWebServerSettings,
 	isGatewayRoute,
+	MIN_POLL_INTERVAL_SECONDS,
+	POLLABLE_SOURCES,
+	pollServiceGit,
 	reloadDockerResource,
+	type ServiceTarget,
 	updateGatewaySettings,
+	updateServiceGitPolling,
+	updateServiceGitToken,
 } from "@dokploy/server";
+import { db } from "@dokploy/server/db";
+import { applications, compose } from "@dokploy/server/db/schema";
 import { checkServicePermissionAndAccess } from "@dokploy/server/services/permission";
 import { TRPCError } from "@trpc/server";
+import { eq } from "drizzle-orm";
 import { z } from "zod";
 import {
 	adminProcedure,
@@ -20,6 +31,7 @@ import {
 	protectedProcedure,
 } from "@/server/api/trpc";
 import { audit } from "@/server/api/utils/audit";
+import { enqueuePolledDeployment } from "@/server/corpo/poll-deploy";
 
 const hostname = z
 	.string()
@@ -65,6 +77,61 @@ const apiCreateGatewayRoute = z
 	})
 	.refine((v) => !v.composeId || !!v.serviceName, {
 		message: "Compose routes need a service name",
+	});
+
+const toServiceTarget = (input: {
+	applicationId?: string;
+	composeId?: string;
+}): ServiceTarget =>
+	input.applicationId
+		? { applicationId: input.applicationId }
+		: { composeId: input.composeId! };
+
+const loadGitSource = async (target: ServiceTarget) => {
+	const columns = {
+		sourceType: true,
+		customGitUrl: true,
+		autoDeploy: true,
+	} as const;
+	const service = target.applicationId
+		? await db.query.applications.findFirst({
+				where: eq(applications.applicationId, target.applicationId),
+				columns,
+			})
+		: await db.query.compose.findFirst({
+				where: eq(compose.composeId, target.composeId!),
+				columns,
+			});
+	if (!service) {
+		throw new TRPCError({ code: "NOT_FOUND", message: "Service not found" });
+	}
+	return service;
+};
+
+const apiServiceGitPolling = z
+	.object({
+		applicationId: z.string().min(1).optional(),
+		composeId: z.string().min(1).optional(),
+		pollEnabled: z.boolean(),
+		pollIntervalSeconds: z
+			.number()
+			.int()
+			.min(MIN_POLL_INTERVAL_SECONDS)
+			.max(24 * 60 * 60),
+	})
+	.refine((v) => !!v.applicationId !== !!v.composeId, {
+		message: "Provide exactly one of applicationId or composeId",
+	});
+
+const apiServiceGitToken = z
+	.object({
+		applicationId: z.string().min(1).optional(),
+		composeId: z.string().min(1).optional(),
+		httpsUsername: z.string().trim().max(200).nullable(),
+		httpsToken: z.string().min(1).max(4000).nullable(),
+	})
+	.refine((v) => !!v.applicationId !== !!v.composeId, {
+		message: "Provide exactly one of applicationId or composeId",
 	});
 
 const toBadRequest = (error: unknown, fallback: string) =>
@@ -173,5 +240,92 @@ export const corpoRouter = createTRPCRouter({
 			} catch (error) {
 				throw toBadRequest(error, "Error creating the IIS route");
 			}
+		}),
+
+	serviceGit: protectedProcedure
+		.input(apiServiceTarget)
+		.query(async ({ input, ctx }) => {
+			const target = toServiceTarget(input);
+			await checkServicePermissionAndAccess(
+				ctx,
+				(input.applicationId ?? input.composeId)!,
+				{ service: ["read"] },
+			);
+			const source = await loadGitSource(target);
+			return {
+				...(await getServiceGitSettings(target)),
+				sourceType: source.sourceType,
+				pollable: (POLLABLE_SOURCES as readonly string[]).includes(
+					source.sourceType,
+				),
+				httpsRepository:
+					source.sourceType === "git" &&
+					/^https?:\/\//i.test(source.customGitUrl ?? ""),
+			};
+		}),
+
+	updateServiceGitPolling: protectedProcedure
+		.input(apiServiceGitPolling)
+		.mutation(async ({ input, ctx }) => {
+			const target = toServiceTarget(input);
+			await checkServicePermissionAndAccess(
+				ctx,
+				(input.applicationId ?? input.composeId)!,
+				{ service: ["create"] },
+			);
+			const source = await loadGitSource(target);
+			if (
+				input.pollEnabled &&
+				!(POLLABLE_SOURCES as readonly string[]).includes(source.sourceType)
+			) {
+				throw new TRPCError({
+					code: "BAD_REQUEST",
+					message: `Polling supports GitHub and Git sources, not "${source.sourceType}".`,
+				});
+			}
+			const { row, turningOn } = await updateServiceGitPolling(target, input);
+			const result = turningOn
+				? await pollServiceGit(row, enqueuePolledDeployment, { deploy: false })
+				: null;
+			return { error: result?.row?.lastPollError ?? null };
+		}),
+
+	updateServiceGitToken: protectedProcedure
+		.input(apiServiceGitToken)
+		.mutation(async ({ input, ctx }) => {
+			const target = toServiceTarget(input);
+			await checkServicePermissionAndAccess(
+				ctx,
+				(input.applicationId ?? input.composeId)!,
+				{ service: ["create"] },
+			);
+			await updateServiceGitToken(target, input);
+			await audit(ctx, {
+				action: "update",
+				resourceType: "service",
+				resourceId: (input.applicationId ?? input.composeId)!,
+				resourceName: "git-https-token",
+			});
+			return true;
+		}),
+
+	pollServiceGitNow: protectedProcedure
+		.input(apiServiceTarget)
+		.mutation(async ({ input, ctx }) => {
+			const target = toServiceTarget(input);
+			await checkServicePermissionAndAccess(
+				ctx,
+				(input.applicationId ?? input.composeId)!,
+				{ deployment: ["create"] },
+			);
+			const row = await getServiceGitRow(target);
+			const result = await pollServiceGit(row, enqueuePolledDeployment, {
+				deploy: row.pollEnabled && !!row.lastSeenSha,
+			});
+			return {
+				decision: result.decision,
+				sha: result.sha,
+				error: result.row?.lastPollError ?? null,
+			};
 		}),
 });

@@ -13,6 +13,7 @@ import { type ReactElement, useEffect, useState } from "react";
 import { toast } from "sonner";
 import superjson from "superjson";
 import { ServiceAccess } from "@/components/corpo/service-access";
+import { ServiceAutoDeploy } from "@/components/corpo/service-auto-deploy";
 import { ShowImport } from "@/components/dashboard/application/advanced/import/show-import";
 import { ShowVolumes } from "@/components/dashboard/application/advanced/volumes/show-volumes";
 import { ShowDeployments } from "@/components/dashboard/application/deployments/show-deployments";
@@ -276,6 +277,7 @@ const Service = (
 									<TabsContent value="general">
 										<div className="flex flex-col gap-4 pt-2.5">
 											<ShowGeneralCompose composeId={composeId} />
+											<ServiceAutoDeploy id={composeId} type="compose" />
 										</div>
 									</TabsContent>
 									{permissions?.envVars.read && (

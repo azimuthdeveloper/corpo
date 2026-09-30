@@ -152,10 +152,7 @@ export const GatewaySettings = () => {
 										<FormItem>
 											<FormLabel>IIS public host</FormLabel>
 											<FormControl>
-												<Input
-													placeholder="iis.example.internal"
-													{...field}
-												/>
+												<Input placeholder="iis.example.internal" {...field} />
 											</FormControl>
 											<FormDescription>
 												The host users type in the browser. IIS routes are

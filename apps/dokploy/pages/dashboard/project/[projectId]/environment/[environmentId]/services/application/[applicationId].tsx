@@ -13,6 +13,7 @@ import { type ReactElement, useEffect, useState } from "react";
 import { toast } from "sonner";
 import superjson from "superjson";
 import { ServiceAccess } from "@/components/corpo/service-access";
+import { ServiceAutoDeploy } from "@/components/corpo/service-auto-deploy";
 import { ShowClusterSettings } from "@/components/dashboard/application/advanced/cluster/show-cluster-settings";
 import { AddCommand } from "@/components/dashboard/application/advanced/general/add-command";
 import { ShowPorts } from "@/components/dashboard/application/advanced/ports/show-port";
@@ -284,6 +285,10 @@ const Service = (
 									<TabsContent value="general">
 										<div className="flex flex-col gap-4 pt-2.5">
 											<ShowGeneralApplication applicationId={applicationId} />
+											<ServiceAutoDeploy
+												id={applicationId}
+												type="application"
+											/>
 										</div>
 									</TabsContent>
 									{permissions?.envVars.read && (

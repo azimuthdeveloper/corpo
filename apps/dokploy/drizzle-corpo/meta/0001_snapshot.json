@@ -1,0 +1,232 @@
+{
+  "id": "8ecf4183-866d-497c-b246-bdc7ec7b9b5f",
+  "prevId": "b497b048-5284-4d3e-9d16-ec48d48622a2",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "public.corpo_gateway": {
+      "name": "corpo_gateway",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "'default'"
+        },
+        "publicHost": {
+          "name": "publicHost",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "publicScheme": {
+          "name": "publicScheme",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'https'"
+        },
+        "pathPrefix": {
+          "name": "pathPrefix",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'cor-'"
+        },
+        "directHost": {
+          "name": "directHost",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "trustedProxyIps": {
+          "name": "trustedProxyIps",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'[]'::jsonb"
+        },
+        "updatedAt": {
+          "name": "updatedAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.corpo_service_git": {
+      "name": "corpo_service_git",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "applicationId": {
+          "name": "applicationId",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "composeId": {
+          "name": "composeId",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "pollEnabled": {
+          "name": "pollEnabled",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "pollIntervalSeconds": {
+          "name": "pollIntervalSeconds",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 60
+        },
+        "lastPolledAt": {
+          "name": "lastPolledAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "nextPollAt": {
+          "name": "nextPollAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "lastSeenSha": {
+          "name": "lastSeenSha",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "lastPollError": {
+          "name": "lastPollError",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "consecutiveFailures": {
+          "name": "consecutiveFailures",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "httpsUsername": {
+          "name": "httpsUsername",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "httpsToken": {
+          "name": "httpsToken",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "updatedAt": {
+          "name": "updatedAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "corpo_service_git_application_idx": {
+          "name": "corpo_service_git_application_idx",
+          "columns": [
+            {
+              "expression": "applicationId",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "corpo_service_git_compose_idx": {
+          "name": "corpo_service_git_compose_idx",
+          "columns": [
+            {
+              "expression": "composeId",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "corpo_service_git_applicationId_application_applicationId_fk": {
+          "name": "corpo_service_git_applicationId_application_applicationId_fk",
+          "tableFrom": "corpo_service_git",
+          "tableTo": "application",
+          "columnsFrom": [
+            "applicationId"
+          ],
+          "columnsTo": [
+            "applicationId"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "corpo_service_git_composeId_compose_composeId_fk": {
+          "name": "corpo_service_git_composeId_compose_composeId_fk",
+          "tableFrom": "corpo_service_git",
+          "tableTo": "compose",
+          "columnsFrom": [
+            "composeId"
+          ],
+          "columnsTo": [
+            "composeId"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    }
+  },
+  "enums": {},
+  "schemas": {},
+  "sequences": {},
+  "roles": {},
+  "policies": {},
+  "views": {},
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}
