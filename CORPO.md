@@ -24,6 +24,13 @@ Corpo is an internal-network fork of [Dokploy](https://github.com/Dokploy/dokplo
   - Watch paths are not applied to polled deployments.
   - Supported sources: GitHub (the existing GitHub App token) and Git (SSH key, or HTTPS with a token).
 - **HTTPS git tokens** (same card, for Git sources with an `https://` URL, such as an Azure DevOps PAT with Code: Read). The token is sent as an `http.extraHeader` through git's environment config, scoped to the single clone or `ls-remote` command, so it never appears in the URL, deployment logs or later build steps.
+- **Network** (Settings → Network): outbound proxy (`HTTP_PROXY`, `HTTPS_PROXY`, `NO_PROXY`) and internal CA certificates (PEM). `NO_PROXY` always includes loopback and the panel's own services.
+  - **Panel:** saving puts the proxy, `NODE_USE_ENV_PROXY=1`, `NODE_EXTRA_CA_CERTS` and `GIT_SSL_CAINFO` on the `dokploy` Swarm service and restarts it. Git clones, polling and GitHub API calls then go through the proxy and trust the CA.
+  - **Builds** (on by default): the proxy variables are passed as Dockerfile build args and as env for Nixpacks, Railpack and buildpacks. Nixpacks may bake them into the image.
+  - **Containers** (off by default): the proxy variables are set on application containers.
+  - **CA in containers** (on by default): the CA is mounted read-only at `/etc/corpo`, with `NODE_EXTRA_CA_CERTS`, `SSL_CERT_FILE`, `REQUESTS_CA_BUNDLE` and `CURL_CA_BUNDLE` set. This covers applications on the Corpo server only; compose services can mount `/etc/dokploy/corpo/ca` themselves. Java apps need their own truststore.
+  - **Docker daemon:** image pulls need the proxy on the host daemon. The page shows the systemd drop-in to install; the Corpo installer (Phase 5) writes it for you.
+  - **Remote servers** are not covered yet: builds and containers there don't get the proxy or CA automatically.
 
 ## Fork rules (keep upstream merges cheap)
 
@@ -47,5 +54,5 @@ Corpo is an internal-network fork of [Dokploy](https://github.com/Dokploy/dokplo
 1. ~~Remove enterprise code, rebrand, drop Let's Encrypt and self-update~~
 2. ~~Gateway settings, IIS routes, exact path routing, `CORPO_*` env~~
 3. ~~Git polling auto-deploy and HTTPS token credentials~~
-4. Corporate proxy (`HTTP(S)_PROXY`, `NO_PROXY`) and internal CA bundle for git, builds and containers
+4. ~~Corporate proxy and internal CA for the panel, git, builds and containers~~
 5. Corpo image build/publish and a forked install script

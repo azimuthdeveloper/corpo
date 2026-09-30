@@ -55,3 +55,15 @@ export const corpoServiceGit = pgTable(
 		uniqueIndex("corpo_service_git_compose_idx").on(table.composeId),
 	],
 );
+
+export const corpoNetwork = pgTable("corpo_network", {
+	id: text("id").primaryKey().default("default"),
+	httpProxy: text("httpProxy"),
+	httpsProxy: text("httpsProxy"),
+	noProxy: text("noProxy"),
+	caCertificates: text("caCertificates"),
+	proxyBuilds: boolean("proxyBuilds").notNull().default(true),
+	proxyContainers: boolean("proxyContainers").notNull().default(false),
+	trustCaInContainers: boolean("trustCaInContainers").notNull().default(true),
+	updatedAt: timestamp("updatedAt").notNull().defaultNow(),
+});

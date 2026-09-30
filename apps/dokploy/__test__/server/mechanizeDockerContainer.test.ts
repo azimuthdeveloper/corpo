@@ -39,6 +39,10 @@ vi.mock("@dokploy/server/corpo/access", () => ({
 	withCorpoEnv: async <T>(application: T) => application,
 }));
 
+vi.mock("@dokploy/server/corpo/network", () => ({
+	corpoCaMounts: async () => [],
+}));
+
 const createApplication = (
 	overrides: Partial<ApplicationNested> = {},
 ): ApplicationNested =>

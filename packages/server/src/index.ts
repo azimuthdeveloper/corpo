@@ -7,6 +7,8 @@ export * from "./corpo/gateway-routes";
 export * from "./corpo/git-auth";
 export * from "./corpo/git-poll";
 export * from "./corpo/license";
+export * from "./corpo/network";
+export * from "./corpo/network-env";
 export * from "./corpo/routing";
 export * from "./corpo/service-git";
 export * from "./db/constants";

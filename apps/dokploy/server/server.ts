@@ -13,6 +13,7 @@ import {
 	sendDokployRestartNotifications,
 	setupDirectories,
 	startCorpoPoller,
+	syncNetworkOnStartup,
 } from "@dokploy/server";
 import { config } from "dotenv";
 import next from "next";
@@ -62,6 +63,7 @@ void app.prepare().then(async () => {
 		if (process.env.NODE_ENV === "production" && !IS_CLOUD) {
 			createDefaultMiddlewares();
 			await initializeNetwork();
+			await syncNetworkOnStartup();
 			await initCronJobs();
 			await initSchedules();
 			await initCancelDeployments();

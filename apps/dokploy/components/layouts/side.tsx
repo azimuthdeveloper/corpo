@@ -303,6 +303,14 @@ const MENU: Menu = {
 		},
 		{
 			isSingle: true,
+			title: "Network",
+			url: "/dashboard/settings/network",
+			icon: ShieldCheck,
+			isEnabled: ({ permissions, isCloud }) =>
+				!!(permissions?.organization.update && !isCloud),
+		},
+		{
+			isSingle: true,
 			title: "Profile",
 			url: "/dashboard/settings/profile",
 			icon: User,

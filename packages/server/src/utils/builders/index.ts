@@ -3,6 +3,7 @@ import { findRegistryByIdWithCredentials } from "@dokploy/server/services/regist
 import type { InferResultType } from "@dokploy/server/types/with";
 import type { CreateServiceOptions } from "dockerode";
 import { withCorpoEnv } from "../../corpo/access";
+import { corpoCaMounts } from "../../corpo/network";
 import { getRegistryTag, uploadImageRemoteCommand } from "../cluster/upload";
 import {
 	calculateResources,
@@ -43,6 +44,7 @@ export type ApplicationNested = InferResultType<
 export const getBuildCommand = async (rawApplication: ApplicationNested) => {
 	const application = await withCorpoEnv(
 		await withResolvedVaultRefs(rawApplication),
+		"build",
 	);
 	let command = "";
 
@@ -86,6 +88,7 @@ export const mechanizeDockerContainer = async (
 ) => {
 	const application = await withCorpoEnv(
 		await withResolvedVaultRefs(rawApplication),
+		"runtime",
 	);
 	const {
 		appName,
@@ -144,7 +147,12 @@ export const mechanizeDockerContainer = async (
 				HealthCheck,
 				Image: image,
 				Env: envVariables,
-				Mounts: [...volumesMount, ...bindsMount, ...filesMount],
+				Mounts: [
+					...volumesMount,
+					...bindsMount,
+					...filesMount,
+					...(await corpoCaMounts(application.serverId)),
+				],
 				...(StopGracePeriod !== null &&
 					StopGracePeriod !== undefined && { StopGracePeriod }),
 				...(command && {

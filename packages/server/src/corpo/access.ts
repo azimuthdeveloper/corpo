@@ -2,6 +2,7 @@ import { db } from "@dokploy/server/db";
 import { domains } from "@dokploy/server/db/schema";
 import { eq } from "drizzle-orm";
 import { type GatewaySettings, getGatewaySettings } from "./gateway";
+import { networkEnvFor } from "./network";
 import { buildPublicUrl, normalizeRoutePath } from "./routing";
 
 type RouteDomain = Pick<
@@ -65,29 +66,40 @@ export const corpoRouteEnv = async (applicationId: string) => {
 	};
 };
 
-// Next.js basePath, Vite base and similar are read at build time, so the vars
-// go into build args as well as the runtime env.
+// Next.js basePath, Vite base and similar are read at build time, so route
+// vars go into build args as well as the env. Proxy and CA vars follow the
+// Network settings for each phase.
 export const withCorpoEnv = async <
 	T extends {
 		applicationId: string;
 		env: string | null;
 		buildArgs: string | null;
+		serverId: string | null;
 	},
 >(
 	application: T,
+	phase: "build" | "runtime",
 ): Promise<T> => {
-	let vars: Awaited<ReturnType<typeof corpoRouteEnv>> = null;
+	const vars: Record<string, string> = {};
 	try {
-		vars = await corpoRouteEnv(application.applicationId);
+		Object.assign(vars, (await networkEnvFor(phase, application.serverId)).env);
+	} catch (error) {
+		console.error("Corpo: could not resolve network env vars", error);
+	}
+	try {
+		Object.assign(vars, await corpoRouteEnv(application.applicationId));
 	} catch (error) {
 		console.error("Corpo: could not resolve route env vars", error);
 	}
-	if (!vars) {
+	if (Object.keys(vars).length === 0) {
 		return application;
 	}
 	return {
 		...application,
 		env: prependEnv(application.env, vars),
-		buildArgs: prependEnv(application.buildArgs, vars),
+		buildArgs:
+			phase === "build"
+				? prependEnv(application.buildArgs, vars)
+				: application.buildArgs,
 	};
 };

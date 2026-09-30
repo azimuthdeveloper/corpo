@@ -1,21 +1,26 @@
 import {
+	applyNetworkToPanel,
 	applyTrustedProxyIps,
 	buildPublicUrl,
 	createGatewayRoute,
+	dockerDaemonProxySnippet,
 	findApplicationById,
 	findDomainsByApplicationId,
 	findDomainsByComposeId,
 	getGatewaySettings,
+	getNetworkSettings,
 	getServiceGitRow,
 	getServiceGitSettings,
 	getWebServerSettings,
 	isGatewayRoute,
 	MIN_POLL_INTERVAL_SECONDS,
 	POLLABLE_SOURCES,
+	parsePemCertificates,
 	pollServiceGit,
 	reloadDockerResource,
 	type ServiceTarget,
 	updateGatewaySettings,
+	updateNetworkSettings,
 	updateServiceGitPolling,
 	updateServiceGitToken,
 } from "@dokploy/server";
@@ -133,6 +138,30 @@ const apiServiceGitToken = z
 	.refine((v) => !!v.applicationId !== !!v.composeId, {
 		message: "Provide exactly one of applicationId or composeId",
 	});
+
+const apiUpdateNetwork = z.object({
+	httpProxy: z.string().trim().max(500).nullable(),
+	httpsProxy: z.string().trim().max(500).nullable(),
+	noProxy: z.string().trim().max(4000).nullable(),
+	caCertificates: z.string().max(200_000).nullable(),
+	proxyBuilds: z.boolean(),
+	proxyContainers: z.boolean(),
+	trustCaInContainers: z.boolean(),
+});
+
+const describeNetwork = (
+	settings: Awaited<ReturnType<typeof getNetworkSettings>>,
+) => {
+	let certificates: ReturnType<typeof parsePemCertificates> = [];
+	try {
+		certificates = parsePemCertificates(settings.caCertificates);
+	} catch {}
+	return {
+		settings,
+		certificates: certificates.map(({ pem: _pem, ...info }) => info),
+		dockerDaemonSnippet: dockerDaemonProxySnippet(settings),
+	};
+};
 
 const toBadRequest = (error: unknown, fallback: string) =>
 	new TRPCError({
@@ -327,5 +356,35 @@ export const corpoRouter = createTRPCRouter({
 				sha: result.sha,
 				error: result.row?.lastPollError ?? null,
 			};
+		}),
+
+	getNetwork: adminProcedure.query(async () =>
+		describeNetwork(await getNetworkSettings()),
+	),
+
+	updateNetwork: adminProcedure
+		.input(apiUpdateNetwork)
+		.mutation(async ({ input, ctx }) => {
+			let settings: Awaited<ReturnType<typeof updateNetworkSettings>>;
+			try {
+				settings = await updateNetworkSettings(input);
+			} catch (error) {
+				throw toBadRequest(error, "Invalid network settings");
+			}
+			let applied: Awaited<ReturnType<typeof applyNetworkToPanel>>;
+			try {
+				applied = await applyNetworkToPanel(settings);
+			} catch (error) {
+				throw toBadRequest(
+					error,
+					"Saved, but the panel could not be updated with the new settings",
+				);
+			}
+			await audit(ctx, {
+				action: "update",
+				resourceType: "settings",
+				resourceName: "corpo-network",
+			});
+			return { ...describeNetwork(settings), applied };
 		}),
 });

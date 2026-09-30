@@ -15,6 +15,13 @@
       "when": 1790772632872,
       "tag": "0001_corpo_service_git",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1790806690066,
+      "tag": "0002_corpo_network",
+      "breakpoints": true
     }
   ]
 }
