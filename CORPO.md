@@ -66,7 +66,7 @@ Then open `http://<server>:3000`, create the admin account, and fill in Settings
 | `X.Y.Z` | a `vX.Y.Z` tag is pushed |
 
 - **Actions:** it is disabled on forks until you enable it in the repository's Actions tab.
-- **Package visibility:** GHCR packages start private. Either make the `corpo` package public, or install with `CORPO_REGISTRY_USER` / `CORPO_REGISTRY_TOKEN` (a token with `read:packages`).
+- **Package visibility:** the package follows the repository's visibility, so it's public while the repo is public. If you make it private, install with `CORPO_REGISTRY_USER` / `CORPO_REGISTRY_TOKEN` (a token with `read:packages`).
 - **Removed workflows:** upstream's Docker Hub publishing, docs sync and release workflows are removed. `pull-request.yml` still checks PRs.
 
 ## Fork rules (keep upstream merges cheap)
