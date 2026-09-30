@@ -286,9 +286,6 @@ export const AddPreviewDomain = ({
 
 													<SelectContent>
 														<SelectItem value="none">None</SelectItem>
-														<SelectItem value={"letsencrypt"}>
-															Let's Encrypt
-														</SelectItem>
 													</SelectContent>
 												</Select>
 												<FormMessage />

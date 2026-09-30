@@ -4,9 +4,9 @@ import {
 	removeGitProvider,
 	updateGitProvider,
 } from "@dokploy/server";
+import { hasValidLicense } from "@dokploy/server/corpo/license";
 import { db } from "@dokploy/server/db";
 import { findMemberByUserId } from "@dokploy/server/services/permission";
-import { hasValidLicense } from "@dokploy/server/services/proprietary/license-key";
 import { TRPCError } from "@trpc/server";
 import { desc, eq, inArray } from "drizzle-orm";
 import {

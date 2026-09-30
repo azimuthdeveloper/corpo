@@ -1,11 +1,14 @@
 import { and, eq } from "drizzle-orm";
 import { drizzle, type PostgresJsDatabase } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
+import * as corpoSchema from "../corpo/schema";
 import { dbUrl } from "./constants";
-import * as schema from "./schema";
+import * as baseSchema from "./schema";
 
-export { and, eq };
+const schema = { ...baseSchema, ...corpoSchema };
+
 export * from "./schema";
+export { and, eq };
 
 type Database = PostgresJsDatabase<typeof schema>;
 

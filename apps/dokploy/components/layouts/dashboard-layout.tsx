@@ -17,7 +17,7 @@ export const DashboardLayout = ({ children, metaName }: Props) => {
 	const { data: haveRootAccess } = api.user.haveRootAccess.useQuery();
 	const { data: isCloud } = api.settings.isCloud.useQuery();
 	const { config: whitelabeling } = useWhitelabeling();
-	const appName = whitelabeling?.appName || "Dokploy";
+	const appName = whitelabeling?.appName || "Corpo";
 	const { data: currentPlan } = api.stripe.getCurrentPlan.useQuery(undefined, {
 		enabled: isCloud === true,
 		refetchOnWindowFocus: false,

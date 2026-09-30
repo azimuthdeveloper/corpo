@@ -10,6 +10,10 @@ import { APIError, createAuthMiddleware } from "better-auth/api";
 import { admin, organization, twoFactor } from "better-auth/plugins";
 import { and, desc, eq } from "drizzle-orm";
 import { IS_CLOUD } from "../constants";
+import {
+	createAuditLog,
+	resolveOrganizationDefaultRole,
+} from "../corpo/license";
 import { db } from "../db";
 import * as schema from "../db/schema";
 import {
@@ -17,8 +21,6 @@ import {
 	getTrustedProviders,
 	getUserByToken,
 } from "../services/admin";
-import { createAuditLog } from "../services/proprietary/audit-log";
-import { resolveOrganizationDefaultRole } from "../services/proprietary/license-key";
 import {
 	getWebServerSettings,
 	updateWebServerSettings,

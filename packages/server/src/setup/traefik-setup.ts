@@ -288,31 +288,11 @@ export const getDefaultTraefikConfig = () => {
 				http3: {
 					advertisedPort: TRAEFIK_HTTP3_PORT,
 				},
-				...(process.env.NODE_ENV === "production" && {
-					http: {
-						tls: {
-							certResolver: "letsencrypt",
-						},
-					},
-				}),
 			},
 		},
 		api: {
 			insecure: true,
 		},
-		...(process.env.NODE_ENV === "production" && {
-			certificatesResolvers: {
-				letsencrypt: {
-					acme: {
-						email: "test@localhost.com",
-						storage: "/etc/dokploy/traefik/dynamic/acme.json",
-						httpChallenge: {
-							entryPoint: "web",
-						},
-					},
-				},
-			},
-		}),
 	};
 
 	const yamlStr = stringify(configObject);
@@ -346,26 +326,10 @@ export const getDefaultServerTraefikConfig = () => {
 				http3: {
 					advertisedPort: TRAEFIK_HTTP3_PORT,
 				},
-				http: {
-					tls: {
-						certResolver: "letsencrypt",
-					},
-				},
 			},
 		},
 		api: {
 			insecure: true,
-		},
-		certificatesResolvers: {
-			letsencrypt: {
-				acme: {
-					email: "test@localhost.com",
-					storage: "/etc/dokploy/traefik/dynamic/acme.json",
-					httpChallenge: {
-						entryPoint: "web",
-					},
-				},
-			},
 		},
 	};
 

@@ -63,7 +63,7 @@ describe("Host rule format regression tests", () => {
 			expect(ruleLabel).toBeDefined();
 			// Verify PathPrefix format
 			expect(ruleLabel).toMatch(/PathPrefix\(`[^`]+`\)/);
-			expect(ruleLabel).toContain("PathPrefix(`/api`)");
+			expect(ruleLabel).toContain("(Path(`/api`) || PathPrefix(`/api/`))");
 			// Ensure opening parenthesis is present
 			expect(ruleLabel).not.toMatch(/PathPrefix`[^`]+`\)/);
 		});
@@ -78,7 +78,7 @@ describe("Host rule format regression tests", () => {
 
 			expect(ruleLabel).toBeDefined();
 			expect(ruleLabel).toBe(
-				"traefik.http.routers.test-app-1-websecure.rule=Host(`example.com`) && PathPrefix(`/api/v1`)",
+				"traefik.http.routers.test-app-1-websecure.rule=Host(`example.com`) && (Path(`/api/v1`) || PathPrefix(`/api/v1/`))",
 			);
 		});
 	});
@@ -135,7 +135,7 @@ describe("Host rule format regression tests", () => {
 			);
 
 			expect(parsedRuleLabel).toContain(
-				"Host(`example.com`) && PathPrefix(`/api`)",
+				"Host(`example.com`) && (Path(`/api`) || PathPrefix(`/api/`))",
 			);
 		});
 	});
@@ -210,7 +210,7 @@ describe("Host rule format regression tests", () => {
 				const ruleLabel = labels.find((l) => l.includes(".rule="));
 
 				expect(ruleLabel).toBeDefined();
-				expect(ruleLabel).toContain(`PathPrefix(\`${path}\`)`);
+				expect(ruleLabel).toContain(`(Path(\`${path}\`) || PathPrefix(\`${path}/\`))`);
 				// Verify parenthesis is present
 				expect(ruleLabel).not.toMatch(/PathPrefix`[^`]+`\)/);
 			});

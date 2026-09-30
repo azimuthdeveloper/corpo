@@ -35,6 +35,10 @@ vi.mock("@dokploy/server/utils/servers/remote-docker", () => ({
 	getRemoteDocker: getRemoteDockerMock,
 }));
 
+vi.mock("@dokploy/server/corpo/access", () => ({
+	withCorpoEnv: async <T>(application: T) => application,
+}));
+
 const createApplication = (
 	overrides: Partial<ApplicationNested> = {},
 ): ApplicationNested =>

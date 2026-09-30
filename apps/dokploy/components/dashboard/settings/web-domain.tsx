@@ -177,32 +177,13 @@ export const WebDomain = () => {
 
 								<FormField
 									control={form.control}
-									name="letsEncryptEmail"
-									render={({ field }) => {
-										return (
-											<FormItem className="col-span-2 md:col-span-1">
-												<FormLabel>Let's Encrypt Email</FormLabel>
-												<FormControl>
-													<Input
-														className="w-full"
-														placeholder={"Dp4kz@example.com"}
-														{...field}
-													/>
-												</FormControl>
-												<FormMessage />
-											</FormItem>
-										);
-									}}
-								/>
-								<FormField
-									control={form.control}
 									name="https"
 									render={({ field }) => (
 										<FormItem className="flex flex-row items-center justify-between p-3 mt-4 border rounded-lg shadow-xs w-full col-span-2">
 											<div className="space-y-0.5">
 												<FormLabel>HTTPS</FormLabel>
 												<FormDescription>
-													Automatically provision SSL Certificate.
+													Serve this panel over HTTPS using a certificate from the Certificates section.
 												</FormDescription>
 												<FormMessage />
 											</div>
@@ -234,9 +215,6 @@ export const WebDomain = () => {
 														</FormControl>
 														<SelectContent>
 															<SelectItem value={"none"}>None</SelectItem>
-															<SelectItem value={"letsencrypt"}>
-																Let's Encrypt
-															</SelectItem>
 														</SelectContent>
 													</Select>
 													<FormMessage />

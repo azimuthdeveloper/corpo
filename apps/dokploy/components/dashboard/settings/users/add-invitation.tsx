@@ -105,7 +105,6 @@ export const AddInvitation = () => {
 	const { mutateAsync: sendInvitation } = api.user.sendInvitation.useMutation();
 	const { mutateAsync: createUserWithCredentials, isPending: isCreating } =
 		api.user.createUserWithCredentials.useMutation();
-	const { data: customRoles } = api.customRole.all.useQuery();
 	const { data: activeOrganization } = api.organization.active.useQuery();
 	const [error, setError] = useState<string | null>(null);
 
@@ -287,11 +286,6 @@ export const AddInvitation = () => {
 											<SelectContent>
 												<SelectItem value="member">Member</SelectItem>
 												<SelectItem value="admin">Admin</SelectItem>
-												{customRoles?.map((role) => (
-													<SelectItem key={role.role} value={role.role}>
-														{role.role}
-													</SelectItem>
-												))}
 											</SelectContent>
 										</Select>
 										<FormDescription>

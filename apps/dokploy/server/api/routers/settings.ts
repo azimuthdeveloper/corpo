@@ -16,7 +16,6 @@ import {
 	getDockerDiskUsage,
 	getDokployImageTag,
 	getLogCleanupStatus,
-	getUpdateData,
 	getWebServerSettings,
 	IS_CLOUD,
 	parseRawConfig,
@@ -34,7 +33,6 @@ import {
 	reloadDockerResource,
 	sendDockerCleanupNotifications,
 	setupGPUSupport,
-	spawnAsync,
 	startLogCleanup,
 	stopLogCleanup,
 	updateLetsEncryptEmail,
@@ -543,37 +541,10 @@ export const settingsRouter = createTRPCRouter({
 			});
 			return true;
 		}),
-	getUpdateData: protectedProcedure.mutation(async () => {
-		if (IS_CLOUD) {
-			return DEFAULT_UPDATE_DATA;
-		}
-
-		return await getUpdateData(packageInfo.version);
-	}),
-	updateServer: adminProcedure.mutation(async ({ ctx }) => {
-		if (IS_CLOUD) {
-			return true;
-		}
-
-		const data = await getUpdateData(packageInfo.version);
-		if (data.updateAvailable) {
-			void spawnAsync("docker", [
-				"service",
-				"update",
-				"--force",
-				"--image",
-				`dokploy/dokploy:${data.latestVersion}`,
-				"dokploy",
-			]);
-			await audit(ctx, {
-				action: "update",
-				resourceType: "settings",
-				resourceName: "dokploy-version",
-			});
-		}
-
-		return true;
-	}),
+	// Upstream's self-update would replace Corpo with the dokploy/dokploy image;
+	// Corpo is upgraded by redeploying its own image instead.
+	getUpdateData: protectedProcedure.mutation(async () => DEFAULT_UPDATE_DATA),
+	updateServer: adminProcedure.mutation(async () => true),
 
 	getDokployVersion: protectedProcedure.query(() => {
 		return packageInfo.version;

@@ -64,7 +64,6 @@ import { api } from "@/utils/api";
 import { createColumns } from "./columns";
 import { DnsHelperModal } from "./dns-helper-modal";
 import { AddDomain } from "./handle-domain";
-import { HandleForwardAuth } from "./handle-forward-auth";
 import { COMPOSE_REDEPLOY_TOAST, ComposeRedeployAlert } from "./redeploy-hint";
 
 export type ValidationState = {
@@ -487,12 +486,6 @@ export const ShowDomains = ({ id, type }: Props) => {
 																	<PenBoxIcon className="size-3.5 text-primary group-hover:text-blue-500" />
 																</Button>
 															</AddDomain>
-														)}
-														{canCreateDomain && type === "application" && (
-															<HandleForwardAuth
-																domainId={item.domainId}
-																applicationId={id}
-															/>
 														)}
 														{canDeleteDomain && (
 															<DialogAction

@@ -428,7 +428,7 @@ export const ShowOverviewServices = () => {
 												<div className="flex items-center gap-1.5 text-muted-foreground">
 													<ServerIcon className="size-3.5" />
 													<span className="truncate">
-														{service.serverName ?? "Dokploy server"}
+														{service.serverName ?? "Corpo server"}
 													</span>
 												</div>
 											</TableCell>

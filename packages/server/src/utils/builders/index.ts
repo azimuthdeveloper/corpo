@@ -2,6 +2,7 @@ import { resolveServiceNetworks } from "@dokploy/server/services/network";
 import { findRegistryByIdWithCredentials } from "@dokploy/server/services/registry";
 import type { InferResultType } from "@dokploy/server/types/with";
 import type { CreateServiceOptions } from "dockerode";
+import { withCorpoEnv } from "../../corpo/access";
 import { getRegistryTag, uploadImageRemoteCommand } from "../cluster/upload";
 import {
 	calculateResources,
@@ -40,7 +41,9 @@ export type ApplicationNested = InferResultType<
 >;
 
 export const getBuildCommand = async (rawApplication: ApplicationNested) => {
-	const application = await withResolvedVaultRefs(rawApplication);
+	const application = await withCorpoEnv(
+		await withResolvedVaultRefs(rawApplication),
+	);
 	let command = "";
 
 	if (application.sourceType !== "docker") {
@@ -81,7 +84,9 @@ export const getBuildCommand = async (rawApplication: ApplicationNested) => {
 export const mechanizeDockerContainer = async (
 	rawApplication: ApplicationNested,
 ) => {
-	const application = await withResolvedVaultRefs(rawApplication);
+	const application = await withCorpoEnv(
+		await withResolvedVaultRefs(rawApplication),
+	);
 	const {
 		appName,
 		env,

@@ -58,7 +58,7 @@ describe("createDomainLabels", () => {
 		);
 
 		expect(labels).toEqual([
-			"traefik.http.routers.test-app-1-websecure.rule=Host(`example.com`) && PathPrefix(`/hello`)",
+			"traefik.http.routers.test-app-1-websecure.rule=Host(`example.com`) && (Path(`/hello`) || PathPrefix(`/hello/`))",
 			"traefik.http.routers.test-app-1-websecure.entrypoints=websecure",
 			"traefik.http.services.test-app-1-websecure.loadbalancer.server.port=8080",
 			"traefik.http.routers.test-app-1-websecure.service=test-app-1-websecure",
@@ -500,7 +500,7 @@ describe("createDomainLabels", () => {
 		);
 
 		expect(labels).toContain(
-			"traefik.http.routers.test-app-1-custom.rule=Host(`example.com`) && PathPrefix(`/api`)",
+			"traefik.http.routers.test-app-1-custom.rule=Host(`example.com`) && (Path(`/api`) || PathPrefix(`/api/`))",
 		);
 	});
 

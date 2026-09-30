@@ -13,7 +13,7 @@ interface Props {
 }
 export const OnboardingLayout = ({ children, leftPanel }: Props) => {
 	const { config: whitelabeling } = useWhitelabelingPublic();
-	const appName = whitelabeling?.appName || "Dokploy";
+	const appName = whitelabeling?.appName || "Corpo";
 	const appDescription =
 		whitelabeling?.appDescription ||
 		"\u201CThe Open Source alternative to Netlify, Vercel, Heroku.\u201D";

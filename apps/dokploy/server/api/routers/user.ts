@@ -15,6 +15,7 @@ import {
 	sendResendNotification,
 	updateUser,
 } from "@dokploy/server";
+import { hasValidLicense } from "@dokploy/server/corpo/license";
 import { db } from "@dokploy/server/db";
 import {
 	account,
@@ -31,7 +32,6 @@ import {
 	hasPermission,
 	resolvePermissions,
 } from "@dokploy/server/services/permission";
-import { hasValidLicense } from "@dokploy/server/services/proprietary/license-key";
 import { TRPCError } from "@trpc/server";
 import * as bcrypt from "bcrypt";
 import { and, asc, desc, eq, gt, ne } from "drizzle-orm";

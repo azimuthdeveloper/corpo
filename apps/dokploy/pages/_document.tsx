@@ -25,11 +25,11 @@ export default function Document({
 	customCss,
 	baseUrl,
 }: WhitelabelingDocumentProps) {
-	const title = appName || "Dokploy";
+	const title = appName || "Corpo";
 	const description =
 		appDescription || "The Open Source alternative to Netlify, Vercel, Heroku.";
 
-	let ogImage = ogImageUrl || "/og.png";
+	let ogImage = ogImageUrl || "/logo.svg";
 	if (ogImage.startsWith("/")) {
 		ogImage = `${baseUrl}${ogImage}`;
 	}

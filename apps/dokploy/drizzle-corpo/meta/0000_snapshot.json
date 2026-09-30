@@ -1,0 +1,79 @@
+{
+  "id": "b497b048-5284-4d3e-9d16-ec48d48622a2",
+  "prevId": "00000000-0000-0000-0000-000000000000",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "public.corpo_gateway": {
+      "name": "corpo_gateway",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "'default'"
+        },
+        "publicHost": {
+          "name": "publicHost",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "publicScheme": {
+          "name": "publicScheme",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'https'"
+        },
+        "pathPrefix": {
+          "name": "pathPrefix",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'cor-'"
+        },
+        "directHost": {
+          "name": "directHost",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "trustedProxyIps": {
+          "name": "trustedProxyIps",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'[]'::jsonb"
+        },
+        "updatedAt": {
+          "name": "updatedAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    }
+  },
+  "enums": {},
+  "schemas": {},
+  "sequences": {},
+  "roles": {},
+  "policies": {},
+  "views": {},
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}

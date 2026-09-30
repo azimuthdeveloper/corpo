@@ -1,4 +1,8 @@
 import type { Domain } from "@dokploy/server/services/domain";
+import {
+	buildHostPathRule,
+	slashRedirectMiddlewareName,
+} from "../../corpo/routing";
 import type { ApplicationNested } from "../builders";
 import {
 	createServiceConfig,
@@ -156,7 +160,7 @@ export const createRouterConfig = async (
 	} = domain;
 	const punycodeHost = toPunycode(host);
 	const routerConfig: HttpRouter = {
-		rule: `Host(\`${punycodeHost}\`)${path !== null && path !== "/" ? ` && PathPrefix(\`${path}\`)` : ""}`,
+		rule: buildHostPathRule(punycodeHost, path),
 		service: `${appName}-service-${uniqueConfigKey}`,
 		middlewares: [],
 		entryPoints: [entryPoint],
@@ -173,6 +177,9 @@ export const createRouterConfig = async (
 		// stripPrefix must come before addPrefix so Traefik strips the
 		// public path first, then prepends the internal path.
 		if (stripPath && path && path !== "/") {
+			routerConfig.middlewares?.push(
+				slashRedirectMiddlewareName(appName, uniqueConfigKey),
+			);
 			const stripMiddleware = `stripprefix-${appName}-${uniqueConfigKey}`;
 			routerConfig.middlewares?.push(stripMiddleware);
 		}

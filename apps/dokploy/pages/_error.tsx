@@ -11,7 +11,7 @@ interface Props {
 export default function ErrorPage({ statusCode }: Props) {
 	const displayStatusCode = statusCode || 500;
 	const { config: whitelabeling } = useWhitelabelingPublic();
-	const appName = whitelabeling?.appName || "Dokploy";
+	const appName = whitelabeling?.appName || "Corpo";
 	const logoUrl = whitelabeling?.logoUrl || undefined;
 	const errorTitle = whitelabeling?.errorPageTitle;
 	const errorDescription = whitelabeling?.errorPageDescription;

@@ -184,7 +184,7 @@ test("Web entrypoint on http domain with custom path", async () => {
 		"web",
 	);
 
-	expect(router.rule).toContain("PathPrefix(`/foo`)");
+	expect(router.rule).toContain("(Path(`/foo`) || PathPrefix(`/foo/`))");
 });
 
 test("Web entrypoint on http domain with redirect", async () => {
@@ -393,7 +393,7 @@ test("Custom entrypoint with path includes PathPrefix in rule", async () => {
 		"custom",
 	);
 
-	expect(router.rule).toContain("PathPrefix(`/api`)");
+	expect(router.rule).toContain("(Path(`/api`) || PathPrefix(`/api/`))");
 	expect(router.entryPoints).toEqual(["custom"]);
 });
 
@@ -527,4 +527,27 @@ test("Subdomain with Russian IDN TLD converts non-ASCII part to punycode", async
 	// app stays ASCII, тест.рф becomes xn--e1aybc.xn--p1ai
 	expect(router.rule).toContain("Host(`app.xn--e1aybc.xn--p1ai`)");
 	expect(router.rule).not.toContain("тест.рф");
+});
+
+test("Strip path adds the trailing-slash redirect before stripping", async () => {
+	const router = await createRouterConfig(
+		{ ...baseApp, appName: "corpo-app" },
+		{ ...baseDomain, path: "/cor-app", stripPath: true },
+		"web",
+	);
+
+	expect(router.middlewares).toEqual([
+		"corpo-slash-corpo-app-1",
+		"stripprefix-corpo-app-1",
+	]);
+});
+
+test("No trailing-slash redirect without strip path", async () => {
+	const router = await createRouterConfig(
+		{ ...baseApp, appName: "corpo-app" },
+		{ ...baseDomain, path: "/cor-app", stripPath: false },
+		"web",
+	);
+
+	expect(router.middlewares).not.toContain("corpo-slash-corpo-app-1");
 });

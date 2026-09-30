@@ -8,6 +8,7 @@ import type { Domain } from "@dokploy/server/services/domain";
 import { eq, inArray } from "drizzle-orm";
 import { quote } from "shell-quote";
 import { parse, stringify } from "yaml";
+import { buildHostPathRule } from "../../corpo/routing";
 import { execAsyncRemote } from "../process/execAsync";
 import { cloneBitbucketRepository } from "../providers/bitbucket";
 import { cloneGitRepository } from "../providers/git";
@@ -434,7 +435,7 @@ export const createDomainLabels = (
 	} = domain;
 	const routerName = `${appName}-${uniqueConfigKey}-${entrypoint}`;
 	const labels = [
-		`traefik.http.routers.${routerName}.rule=Host(\`${host}\`)${path && path !== "/" ? ` && PathPrefix(\`${path}\`)` : ""}`,
+		`traefik.http.routers.${routerName}.rule=${buildHostPathRule(host, path)}`,
 		`traefik.http.routers.${routerName}.entrypoints=${entrypoint}`,
 		`traefik.http.services.${routerName}.loadbalancer.server.port=${port}`,
 		`traefik.http.routers.${routerName}.service=${routerName}`,

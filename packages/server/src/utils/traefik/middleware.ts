@@ -3,6 +3,10 @@ import { join } from "node:path";
 import { paths } from "@dokploy/server/constants";
 import type { Domain } from "@dokploy/server/services/domain";
 import { parse, stringify } from "yaml";
+import {
+	buildSlashRedirectMiddleware,
+	slashRedirectMiddlewareName,
+} from "../../corpo/routing";
 import type { ApplicationNested } from "../builders";
 import { execAsyncRemote } from "../process/execAsync";
 import { writeTraefikConfigRemote } from "./application";
@@ -172,6 +176,12 @@ export const createPathMiddlewares = async (
 				prefixes: [path],
 			},
 		};
+		const slashRedirect = buildSlashRedirectMiddleware(path);
+		if (slashRedirect) {
+			config.http!.middlewares[
+				slashRedirectMiddlewareName(appName, uniqueConfigKey)
+			] = slashRedirect;
+		}
 	}
 
 	if (app.serverId) {
@@ -213,6 +223,9 @@ export const removePathMiddlewares = async (
 
 		delete config.http.middlewares[addPrefixMiddleware];
 		delete config.http.middlewares[stripPrefixMiddleware];
+		delete config.http.middlewares[
+			slashRedirectMiddlewareName(appName, uniqueConfigKey)
+		];
 	}
 
 	if (

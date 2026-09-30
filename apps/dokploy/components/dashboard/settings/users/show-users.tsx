@@ -37,8 +37,7 @@ export const ShowUsers = () => {
 	const { data, isPending, refetch } = api.user.all.useQuery();
 	const { mutateAsync, isPending: isRemoving } = api.user.remove.useMutation();
 	const { data: permissions } = api.user.getPermissions.useQuery();
-	const { data: hasValidLicense } =
-		api.licenseKey.haveValidLicenseKey.useQuery();
+	const hasValidLicense = false;
 
 	const utils = api.useUtils();
 	const { data: session } = api.user.session.useQuery();

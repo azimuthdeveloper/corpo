@@ -12,6 +12,7 @@ import { useRouter } from "next/router";
 import { type ReactElement, useEffect, useState } from "react";
 import { toast } from "sonner";
 import superjson from "superjson";
+import { ServiceAccess } from "@/components/corpo/service-access";
 import { ShowImport } from "@/components/dashboard/application/advanced/import/show-import";
 import { ShowVolumes } from "@/components/dashboard/application/advanced/volumes/show-volumes";
 import { ShowDeployments } from "@/components/dashboard/application/deployments/show-deployments";
@@ -92,7 +93,7 @@ const Service = (
 		projectId: data?.environment?.projectId || "",
 	});
 	const { config: whitelabeling } = useWhitelabeling();
-	const appName = whitelabeling?.appName || "Dokploy";
+	const appName = whitelabeling?.appName || "Corpo";
 	const environmentDropdownItems =
 		environments?.map((env) => ({
 			name: env.name,
@@ -154,7 +155,7 @@ const Service = (
 														: "destructive"
 											}
 										>
-											{data?.server?.name || "Dokploy Server"}
+											{data?.server?.name || "Corpo Server"}
 										</Badge>
 										{data?.server?.serverStatus === "inactive" && (
 											<TooltipProvider>
@@ -415,6 +416,7 @@ const Service = (
 									{permissions?.domain.read && (
 										<TabsContent value="domains">
 											<div className="flex flex-col gap-4 pt-2.5">
+												<ServiceAccess id={composeId} type="compose" />
 												<ShowDomains id={composeId} type="compose" />
 											</div>
 										</TabsContent>

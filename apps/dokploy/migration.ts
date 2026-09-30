@@ -7,6 +7,12 @@ const sql = postgres(dbUrl, { max: 1 });
 const db = drizzle(sql);
 
 await migrate(db, { migrationsFolder: "drizzle" })
+	.then(() =>
+		migrate(db, {
+			migrationsFolder: "drizzle-corpo",
+			migrationsTable: "corpo_migrations",
+		}),
+	)
 	.then(() => {
 		console.log("Migration complete");
 		sql.end();

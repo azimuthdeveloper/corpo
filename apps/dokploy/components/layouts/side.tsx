@@ -1,4 +1,5 @@
 "use client";
+import { CORPO_BRANDING } from "@dokploy/server/corpo/branding";
 import type { inferRouterOutputs } from "@trpc/server";
 import {
 	Activity,
@@ -11,7 +12,6 @@ import {
 	ChevronRight,
 	ChevronsUpDown,
 	CircleHelp,
-	ClipboardList,
 	Clock,
 	CreditCard,
 	Folder,
@@ -21,14 +21,12 @@ import {
 	Globe,
 	HardDrive,
 	House,
-	Key,
 	KeyRound,
 	LayoutGrid,
 	Loader2,
-	LogIn,
 	type LucideIcon,
+	Network,
 	Package,
-	Palette,
 	Server,
 	ShieldCheck,
 	Smartphone,
@@ -297,6 +295,14 @@ const MENU: Menu = {
 		},
 		{
 			isSingle: true,
+			title: "Gateway",
+			url: "/dashboard/settings/gateway",
+			icon: Network,
+			isEnabled: ({ permissions, isCloud }) =>
+				!!(permissions?.organization.update && !isCloud),
+		},
+		{
+			isSingle: true,
 			title: "Profile",
 			url: "/dashboard/settings/profile",
 			icon: User,
@@ -329,13 +335,6 @@ const MENU: Menu = {
 			url: "/dashboard/settings/users",
 			// Only enabled for users with member.read permission
 			isEnabled: ({ permissions }) => !!permissions?.member.read,
-		},
-		{
-			isSingle: true,
-			title: "Audit Logs",
-			icon: ClipboardList,
-			url: "/dashboard/settings/audit-logs",
-			isEnabled: ({ permissions }) => !!permissions?.auditLog.read,
 		},
 		{
 			isSingle: true,
@@ -418,30 +417,6 @@ const MENU: Menu = {
 			icon: CreditCard,
 			// Only enabled for owners in cloud environments
 			isEnabled: ({ auth, isCloud }) => !!(auth?.role === "owner" && isCloud),
-		},
-		{
-			isSingle: true,
-			title: "License",
-			url: "/dashboard/settings/license",
-			icon: Key,
-			// Only enabled for owners
-			isEnabled: ({ auth }) => !!(auth?.role === "owner"),
-		},
-		{
-			isSingle: true,
-			title: "SSO",
-			url: "/dashboard/settings/sso",
-			icon: LogIn,
-			// Enabled for admins in both cloud and self-hosted (enterprise)
-			isEnabled: ({ permissions }) => !!permissions?.organization.update,
-		},
-		{
-			isSingle: true,
-			title: "Whitelabeling",
-			url: "/dashboard/settings/whitelabeling",
-			icon: Palette,
-			// Only enabled for owners in non-cloud environments (enterprise)
-			isEnabled: ({ auth, isCloud }) => !!(auth?.role === "owner" && !isCloud),
 		},
 	],
 
@@ -586,8 +561,7 @@ function SidebarLogo() {
 	const { isMobile } = useSidebar();
 	const isCollapsed = state === "collapsed" && !isMobile;
 	const { data: activeOrganization } = api.organization.active.useQuery();
-	const { data: haveValidLicense } =
-		api.licenseKey.haveValidLicenseKey.useQuery();
+	const haveValidLicense = false;
 
 	const { data: invitations, refetch: refetchInvitations } =
 		api.user.getInvitations.useQuery();
@@ -948,10 +922,7 @@ export default function Page({ children }: Props) {
 	const { data: auth } = api.user.get.useQuery();
 	const { data: permissions } = api.user.getPermissions.useQuery();
 	const { data: dokployVersion } = api.settings.getDokployVersion.useQuery();
-	const { data: whitelabeling } = api.whitelabeling.get.useQuery(undefined, {
-		staleTime: 5 * 60 * 1000,
-		refetchOnWindowFocus: false,
-	});
+	const whitelabeling = CORPO_BRANDING;
 
 	const includesProjects = pathname?.includes("/dashboard/project");
 	const { data: isCloud } = api.settings.isCloud.useQuery();

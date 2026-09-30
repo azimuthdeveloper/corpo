@@ -1,3 +1,4 @@
+import { hasValidLicense } from "@dokploy/server/corpo/license";
 import { db } from "@dokploy/server/db";
 import {
 	type apiCreateServer,
@@ -5,7 +6,6 @@ import {
 	organization,
 	server,
 } from "@dokploy/server/db/schema";
-import { hasValidLicense } from "@dokploy/server/services/proprietary/license-key";
 import { TRPCError } from "@trpc/server";
 import { and, eq } from "drizzle-orm";
 import type { z } from "zod";

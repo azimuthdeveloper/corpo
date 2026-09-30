@@ -69,7 +69,7 @@ const MySql = (
 		projectId: data?.environment?.projectId || "",
 	});
 	const { config: whitelabeling } = useWhitelabeling();
-	const appName = whitelabeling?.appName || "Dokploy";
+	const appName = whitelabeling?.appName || "Corpo";
 	const environmentDropdownItems =
 		environments?.map((env) => ({
 			name: env.name,
@@ -129,7 +129,7 @@ const MySql = (
 														: "destructive"
 											}
 										>
-											{data?.server?.name || "Dokploy Server"}
+											{data?.server?.name || "Corpo Server"}
 										</Badge>
 										{data?.server?.serverStatus === "inactive" && (
 											<TooltipProvider delayDuration={0}>

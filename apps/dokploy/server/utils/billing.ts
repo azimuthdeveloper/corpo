@@ -1,5 +1,5 @@
 import { findUserById, IS_CLOUD } from "@dokploy/server";
-import { getOrganizationOwnerId } from "@dokploy/server/services/proprietary/sso";
+import { getOrganizationOwnerId } from "@dokploy/server/corpo/license";
 import Stripe from "stripe";
 import {
 	HOBBY_PRICE_ANNUAL_ID,

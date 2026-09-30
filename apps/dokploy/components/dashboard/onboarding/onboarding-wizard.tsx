@@ -111,7 +111,7 @@ export const OnboardingWizard = ({ onClose }: Props) => {
 							<div className="flex items-center gap-2.5 text-zinc-50 [&_path]:!fill-white [&_path]:!stroke-white">
 								<Logo className="size-7" />
 								<span className="text-lg font-semibold tracking-tight">
-									Dokploy
+									Corpo
 								</span>
 							</div>
 							{!isLastVisible && (
